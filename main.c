@@ -665,7 +665,8 @@ void lesson21_shape_array_polymorphism(void) {
 }
 
 void lesson22_bitwise_basics(void) {
-	unsigned char a = 0b11001100; // 204 in decimal
+	// unsigned char a = 0b11001100; // 204 in decimal but NOT portable
+	unsigned char a = 0xCC; // 204 in decimal
 	unsigned char b = 0x0F;
 
 	// what happens if a cast the into an int?
@@ -696,11 +697,153 @@ void print_binary(unsigned char value) {
 	for (int i = 7; i >= 0; i--) {
 		printf("%d", (value >> i) & 1);
 	}
+	printf("\n");
 }
+
+void lesson22_bitwise_and(void) {
+	unsigned int x = 1;
+	unsigned int y = 2;
+	unsigned int result = 1 & 2;
+	print_binary(x);
+	print_binary(y);
+	print_binary(result);
+
+	// okay, we can use a "mask" to check if a certain bit is turned on
+	// lets check if the leading bit is "on"
+	unsigned int z = 1; // 00000001
+	unsigned int mask = 128; // 10000000
+	unsigned int result_again = z & mask;
+	print_binary(result_again); // will output 00000000
+
+	// but if we do this we should get 128
+	x = 128;
+	result_again = x & mask;
+	printf("%d\n", result_again); // 128 because the leading bit is set
+}
+
+void lesson22_bitwise_or(void) {
+	unsigned int x = 1;
+	unsigned int mask = 0;
+	unsigned int result = x | mask;
+	printf("%u\n", result); // should equal 1
+	x = 128; // 10000000
+	mask = 1; // 00000001
+	result = x | mask; // 10000001
+	printf("%u\n", result); // should equal 129
+}
+
+void lesson22_bitwise_exclusive_or(void) {
+	unsigned int x = 0; // 00000000
+	unsigned int mask = 22; // 00011010
+	unsigned int result = x ^ mask;
+	printf("%u\n", result); // should output 22
+
+	x = 48; // 00110000
+	mask = 1; // 00000001
+	result = x ^ mask;
+	printf("%u\n", result); // should output 49
+}
+
+void lesson22_bitwise_not(void) {
+
+	// when using bitwise not (~) make sure we are working with a single byte
+	unsigned char x = 0; // 00000000
+	unsigned char result = ~x; // 11111111
+	printf("%u\n", result); // should output 255
+
+	// working with types that require more than 1 byte may output unexpected results
+	int a = 0;
+	printf("%d\n", ~a); // outputs -1
+
+}
+
+void explain_byte(uint8_t value) {
+	printf("Binary: ");
+	for (int i = 7; i >= 0; i--) {
+		printf("%d", (value >> i) & 1);
+	}
+	printf("\n");
+	printf("Unsigned: %u\n", value);
+	printf("Signed (two's complement): %d\n", (int8_t)value);
+}
+
+void toggle_between_negative_and_positive(int8_t num) {
+	uint8_t bits = (uint8_t)num;
+	if (num > 0) {
+		uint8_t flipped = ~bits + 1;
+		printf("Flipped: %d\n", (int8_t)flipped);
+	} else if (num < 0) {
+		uint8_t flipped = ~bits + 1;
+		printf("Flipped: %d\n", flipped); // prints positive version
+	} else {
+		printf("Zero stays zero: 0\n");
+	}
+}
+
+void lesson22_bitwise_bitshift(void) {
+	unsigned int x = 1; // 00000001
+	unsigned int y = x << 2;
+	printf("%u\n", y); // should print 4
+	print_binary(y);
+	y = y >> 2;
+	printf("%u\n", y); // should be back at 1
+}
+
+// what if we have 01101101 and we want to extract he first two bits 01
+void lesson23_extracting_bits(void) {
+	u_int8_t value = 109; // 01101101
+	printf("Original: ");
+	print_binary(value);
+	u_int8_t mask = 3; // 00000011
+	unsigned char result = value & mask;
+	print_binary(result); // 00000001
+}
+
+// what if I just want the value of the the first bit, how about the second?
+void lesson23_accessing_bits(void) {
+
+}
+
+void lesson23_combining_bits(void) {
+
+}
+
+void lesson24_ascii_code_points(void) {
+	char input[100];
+	printf("Enter a string (ASCII only): ");
+	if (fgets(input, sizeof(input), stdin) == NULL) {
+		fprintf(stderr, "Input error\n");
+		return;
+	}
+	input[strcspn(input, "\n")] = '\0';
+	for (size_t i = 0; i < strlen(input); i++) {
+		unsigned char c = input[i];
+		printf("Character: %c -> ASCII Code Point: %u (0x%02X)\n", c, c, c);
+	}
+}
+
 
 int main(void) {
 
-	lesson22_bitwise_basics();
+	// lesson24_ascii_code_points();
+
+	lesson23_extracting_bits();
+
+	// lesson22_bitwise_bitshift();
+
+	// toggle_between_negative_and_positive(-22);
+
+	// explain_byte(-1);
+
+	// lesson22_bitwise_not();
+
+	// lesson22_bitwise_exclusive_or();
+
+	// lesson22_bitwise_or();
+
+	// lesson22_bitwise_and();
+
+	// lesson22_bitwise_basics();
 
 	// lesson21_shape_array_polymorphism();
 
