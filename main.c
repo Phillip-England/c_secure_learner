@@ -791,24 +791,36 @@ void lesson22_bitwise_bitshift(void) {
 
 // what if we have 01101101 and we want to extract he first two bits 01
 void lesson23_extracting_bits(void) {
-	u_int8_t value = 109; // 01101101
+	uint8_t value = 109; // 01101101
 	printf("Original: ");
 	print_binary(value);
-	u_int8_t mask = 3; // 00000011
+	uint8_t mask = 3; // 00000011
 	unsigned char result = value & mask;
 	print_binary(result); // 00000001
 }
 
-// what if I just want the value of the the first bit, how about the second?
-void lesson23_accessing_bits(void) {
-
+uint8_t bitwit_get(uint8_t flags, uint8_t position) {
+	if (position >= 8) {
+		return 0;
+	}
+	if (flags & (1 << position)) {
+		return 1; // true
+	}	
+	return 0; // false
 }
 
-void lesson23_combining_bits(void) {
-
+uint16_t bitwit_smash(uint8_t x, uint8_t y) {
+	return ((uint16_t)x << 8) | y;
 }
 
-void lesson24_ascii_code_points(void) {
+void lesson24_classify_byte(unsigned char *c) {
+	if (strlen(c) > 4) {
+		fprintf(stderr, "may only pass up to 4 bytes at a time");
+		return;
+	}
+}
+
+void lesson25_ascii_code_points(void) {
 	char input[100];
 	printf("Enter a string (ASCII only): ");
 	if (fgets(input, sizeof(input), stdin) == NULL) {
@@ -825,9 +837,21 @@ void lesson24_ascii_code_points(void) {
 
 int main(void) {
 
-	// lesson24_ascii_code_points();
+	// lesson25_ascii_code_points();
 
-	lesson23_extracting_bits();
+	lesson24_classify_byte("aaaa");
+
+	// uint16_t smashed = bitwit_smash(1, 2);
+	// for (int i = 15; i >= 0; i--) {
+	// 	uint8_t bit = (smashed >> i) & 1;
+	// 	printf("%d", bit);
+	// }
+	// printf("\n");
+
+	// u_int8_t is_set = bitwit_get(5, 0);
+	// printf("%u\n", is_set);
+
+	// lesson23_extracting_bits();
 
 	// lesson22_bitwise_bitshift();
 
