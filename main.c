@@ -815,7 +815,7 @@ uint16_t bitwit_smash(uint8_t x, uint8_t y) {
 	return ((uint16_t)x << 8) | y;
 }
 
-void lesson24_classify_byte(const char *c) {
+void lesson24_classify_byte_in_decimal(const char *c) {
 	unsigned char byte = (unsigned char)*c;
 	if ((byte & 128) == 0)  {
 		printf("hit a one byte char\n");
@@ -832,11 +832,61 @@ void lesson24_classify_byte(const char *c) {
 	if ((byte & 192) == 128) {
 		printf("hit a continuation byte\n");
 	}
-
-
 }
 
-void lesson25_ascii_code_points(void) {
+void lesson24_classify_byte_in_hex(const char *c) {
+	unsigned char byte = (unsigned char)*c;
+	if ((byte & 0x80) == 0x00)  {
+		printf("hit a one byte char\n");
+	}
+	if ((byte & 0xE0) == 0xC0) {
+		printf("hit two byte char\n");
+	}
+	if ((byte & 0xF0) == 0xE0) {
+		printf("hit three byte char\n");
+	}
+	if ((byte & 0xF8) == 0xF0) {
+		printf("hit a four byte char\n");
+	}
+	if ((byte & 0xC0) == 0x80) {
+		printf("hit a continuation byte\n");
+	}
+}
+
+void lesson25_counting_characters(const char *utf8) {
+	int count = 0;
+	const char *start = utf8;
+	while (*utf8) {
+		unsigned char byte = (unsigned char)*utf8;
+		if ((byte & 0x80) == 0x00) {
+			count++;
+			utf8++;
+			continue;
+		}
+		if ((byte & 0xE0) == 0xC0) {
+			count++;
+			utf8 = utf8 + 2;
+			continue;
+		}
+		if ((byte & 0xF0) == 0xE0) {
+			count++;
+			utf8 = utf8 + 3;
+			continue;
+		}
+		if ((byte & 0xF8) == 0xF0) {
+			count++;
+			utf8 = utf8 + 4;
+			continue;
+		}
+		if ((byte & 0xC0) == 0x80) {
+			fprintf(stderr, "error: hit a continuation byte where it should not be");
+			exit(EXIT_FAILURE);
+		}
+	}
+	printf("%s has %d characters", start, count);
+}
+
+void lesson26_ascii_code_points(void) {
 	char input[100];
 	printf("Enter a string (ASCII only): ");
 	if (fgets(input, sizeof(input), stdin) == NULL) {
@@ -863,13 +913,18 @@ void lesson_a1_char_types(void) {
 	 printf("%d\n", c_size);
 }
 
+
 int main(void) {
 
-	// lesson25_ascii_code_points();
+	// lesson26_ascii_code_points();
+
+	lesson25_counting_characters("as∂∂da");
 
 	// lesson_a1_char_types();
 
-	lesson24_classify_byte("∂");
+	// lesson24_classify_byte_in_hex("∂");
+
+	// lesson24_classify_byte_in_decimal("∂");
 
 	// uint16_t smashed = bitwit_smash(1, 2);
 	// for (int i = 15; i >= 0; i--) {
