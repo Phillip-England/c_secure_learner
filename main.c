@@ -700,6 +700,8 @@ void print_binary(unsigned char value) {
 	printf("\n");
 }
 
+
+// TIP: bitwise AND is used to ISOLATE cetain bits!
 void lesson22_bitwise_and(void) {
 	unsigned int x = 1;
 	unsigned int y = 2;
@@ -813,11 +815,25 @@ uint16_t bitwit_smash(uint8_t x, uint8_t y) {
 	return ((uint16_t)x << 8) | y;
 }
 
-void lesson24_classify_byte(unsigned char *c) {
-	if (strlen(c) > 4) {
-		fprintf(stderr, "may only pass up to 4 bytes at a time");
-		return;
+void lesson24_classify_byte(const char *c) {
+	unsigned char byte = (unsigned char)*c;
+	if ((byte & 128) == 0)  {
+		printf("hit a one byte char\n");
 	}
+	if ((byte & 224) == 192) {
+		printf("hit two byte char\n");
+	}
+	if ((byte & 240) == 224) {
+		printf("hit three byte char\n");
+	}
+	if ((byte & 248) == 240) {
+		printf("hit a four byte char\n");
+	}
+	if ((byte & 192) == 128) {
+		printf("hit a continuation byte\n");
+	}
+
+
 }
 
 void lesson25_ascii_code_points(void) {
@@ -834,12 +850,26 @@ void lesson25_ascii_code_points(void) {
 	}
 }
 
+void lesson_a1_char_types(void) {
+	char c = -1;
+	unsigned char uc = 255;
+	int i = c;
+
+	printf("Signed char c = %d\n", c);
+	printf("Unsigned char us = %u\n", uc);
+	printf("Assigned signed char to int: i = %d\n", i);
+
+	 int c_size = sizeof(i);
+	 printf("%d\n", c_size);
+}
 
 int main(void) {
 
 	// lesson25_ascii_code_points();
 
-	lesson24_classify_byte("aaaa");
+	// lesson_a1_char_types();
+
+	lesson24_classify_byte("∂");
 
 	// uint16_t smashed = bitwit_smash(1, 2);
 	// for (int i = 15; i >= 0; i--) {
