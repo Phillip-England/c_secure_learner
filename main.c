@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <pthread.h>
 
 void lesson1_intro(void) {
 	int age;
@@ -913,12 +916,227 @@ void lesson_a1_char_types(void) {
 	 printf("%d\n", c_size);
 }
 
+#define FLAG_READ 0x01
+#define FLAG_WRITE 0x02
+#define FLAG_EXEC 0x04
+
+uint8_t lesson27_combine_flags(uint8_t flag1, uint8_t flag2) {
+	return flag1 | flag2;
+}
+
+uint8_t lesson27_clear_flags(uint8_t permissions) {
+	permissions = permissions & ~FLAG_READ;
+	permissions = permissions & ~FLAG_EXEC;
+	permissions = permissions & ~FLAG_WRITE;
+	return permissions;
+}
+
+
+uint8_t lesson27_set_flag(uint8_t permissions, uint8_t flag) {
+	return permissions | flag;
+}
+
+uint8_t lesson27_has_flag(uint8_t permissions, uint8_t flag) {
+	return (permissions & flag) != 0;
+} 
+
+void lesson27_print_set_flags(uint8_t permissions) {
+	if (lesson27_has_flag(permissions, FLAG_EXEC)) {
+		printf("has exec permissions\n");
+	} 
+	if (lesson27_has_flag(permissions, FLAG_WRITE)) {
+		printf("has write flag\n");
+	} 
+	if (lesson27_has_flag(permissions, FLAG_READ)) {
+		printf("has read flag\n");
+	}
+}
+
+
+void lesson28_fork_and_exec(void) {
+	pid_t pid = fork();
+	if (pid < 0) {
+		perror("fork failed");
+		exit(EXIT_FAILURE);
+	}
+	if (pid == 0) {
+		printf("Child: I will now run `ls -l`\n");
+		execl("/bin/ls", "ls", "-l", (char *)NULL);
+		perror("exec failed");
+		exit(EXIT_FAILURE);
+	} else {
+		printf("Parent: waiting for child proces to finish...\n");
+		wait(NULL);
+		printf("Parent: child finished\n");
+	}
+}
+
+void *thread_function(void *arg) {
+	const char *message = (const char *)arg;
+	for (int i = 0; i < 3; i++) {
+		printf("Thread says: %s (%d)\n", message, i);
+		sleep(1);
+	}
+	return NULL;
+}
+
+void lesson30_two_threads_running(void) {
+	pthread_t thread1, thread2;
+	pthread_create(&thread1, NULL, thread_function, "Hello from thead 1");
+	pthread_create(&thread2, NULL, thread_function, "Hello from thead 2");
+	pthread_join(thread1, NULL);
+	pthread_join(thread2, NULL);
+	printf("Main thread: both theads are done\n");
+}
+
+typedef struct {
+	int *counter;
+	pthread_mutex_t *lock;
+} ThreadArgs;
+
+void *increment_task(void *arg) {
+	ThreadArgs *args = (ThreadArgs *)arg;
+	for (int i = 0; i < 100000; i++) {
+		pthread_mutex_lock(args->lock);
+		(*args->counter)++;
+		pthread_mutex_unlock(args->lock);
+	}
+	return NULL;
+}
+
+void lesson31_mutex_locks(void) {
+	int counter = 0;
+	pthread_mutex_t lock;
+	pthread_t t1, t2;
+	pthread_mutex_init(&lock, NULL);
+
+	ThreadArgs args = { .counter = &counter, .lock = &lock };
+
+	pthread_create(&t1, NULL, increment_task, &args);
+	pthread_create(&t2, NULL, increment_task, &args);
+
+	pthread_join(t1, NULL);
+	pthread_join(t2, NULL);
+
+	pthread_mutex_destroy(&lock);
+
+	printf("final counter: %d\n", counter);
+
+}
+
+
+void lesson32_dereferencing(void) {
+	int x = 5;
+	int *p = &x;
+	printf("%d\n", *p);
+}
+
+void lesson32_changing_value_via_pointer(void) {
+	int x = 5;
+	int *p = &x;
+	*p = 10;
+	printf("%d\n", x);
+}
+
+void lesson32_incrementing_via_pointer(void) {
+	int x = 5;
+	int *p = &x;
+	(*p)++;
+	printf("%d\n", x);
+}
+
+void lesson32_pointer_to_pointer(void) {
+	int x = 5;
+	int *p = &x;
+	int **pp = &p;
+	**pp = 42;
+	printf("%d\n", x);
+}
+
+typedef struct LinkedListNode {
+	int data;
+	struct LinkedListNode *next;
+} LinkedListNode;
+
+LinkedListNode *create_node(int value) {
+	LinkedListNode *new_node = malloc(sizeof(LinkedListNode));
+	if (!new_node) {
+		fprintf(stderr, "Memory allocation failed\n");
+		exit(EXIT_FAILURE);
+	}
+	new_node->data = value;
+	new_node->next = NULL;
+	return new_node;
+}
+
+LinkedListNode *insert_at_start(LinkedListNode *head, int value) {
+	LinkedListNode *new_node = create_node(value);
+	new_node->next = head;
+	return new_node;
+}
+
+void print_list(LinkedListNode *head) {
+	LinkedListNode *current = head;
+	while (current != NULL) {
+		printf("%d -> ", current->data);
+		current = current->next;
+	}
+	printf("NULL\n");
+}
+
+void free_list(LinkedListNode *head) {
+	LinkedListNode *current = head;
+	while (current != NULL) {
+		LinkedListNode *next = current->next;
+		free(current);
+		current = next;
+	}
+}
+
 
 int main(void) {
 
+	LinkedListNode *head = NULL;
+	head = insert_at_start(head, 10);
+	head = insert_at_start(head, 20);
+	head = insert_at_start(head, 30);
+	print_list(head);
+	free_list(head);
+
+
+	// lesson32_pointer_to_pointer();
+
+	// lesson32_incrementing_via_pointer();
+
+	// lesson32_changing_value_via_pointer();
+
+	// lesson32_dereferencing();
+
+	// lesson31_mutex_locks();
+
+	// lesson30_two_threads_running();
+
+	// lesson28_fork_and_exec();
+
+	// lesson27_print_set_flags(0x07);
+
+	// uint8_t permissions = 0x06;
+	// uint8_t has_write_permissions = lesson27_has_flag(permissions, 0xF0);
+	// printf("%d\n", has_write_permissions);
+
+	// uint8_t permissions = lesson27_set_flag(0x00, FLAG_READ);
+	// print_binary(permissions);
+
+	// uint8_t permissions = lesson27_clear_flags(lesson27_combine_flags(FLAG_READ, FLAG_WRITE));
+	// print_binary(permissions);
+
+	// uint8_t combined = lesson27_combine_flags(FLAG_READ, FLAG_WRITE);
+	// print_binary(combined);
+
+
 	// lesson26_ascii_code_points();
 
-	lesson25_counting_characters("as∂∂da");
+	// lesson25_counting_characters("as∂∂da");
 
 	// lesson_a1_char_types();
 
@@ -933,7 +1151,7 @@ int main(void) {
 	// }
 	// printf("\n");
 
-	// u_int8_t is_set = bitwit_get(5, 0);
+	// uint8_t is_set = bitwit_get(5, 0);
 	// printf("%u\n", is_set);
 
 	// lesson23_extracting_bits();
