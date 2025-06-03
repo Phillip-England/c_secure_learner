@@ -1075,6 +1075,18 @@ LinkedListNode *insert_at_start(LinkedListNode *head, int value) {
 	return new_node;
 }
 
+LinkedListNode *insert_at_end(LinkedListNode *head, int value) {
+	if (head == NULL) { // TIP: remember, what if the list is empty?
+		return create_node(value);
+	}
+	LinkedListNode *current = head;
+	while (current->next != NULL) {
+		current = current->next;
+	}
+	current->next = create_node(value);
+	return current->next;
+}
+
 void print_list(LinkedListNode *head) {
 	LinkedListNode *current = head;
 	while (current != NULL) {
@@ -1082,6 +1094,10 @@ void print_list(LinkedListNode *head) {
 		current = current->next;
 	}
 	printf("NULL\n");
+}
+
+void print_node(LinkedListNode *node) {
+	printf("%d\n", node->data);
 }
 
 void free_list(LinkedListNode *head) {
@@ -1093,6 +1109,25 @@ void free_list(LinkedListNode *head) {
 	}
 }
 
+LinkedListNode *insert_at_position(LinkedListNode *head, int value, uint8_t pos) {
+	uint8_t current_pos = 0;
+	LinkedListNode *current = head;
+	while (current != NULL) {
+		if (current_pos == pos - 1) {
+			LinkedListNode *new_node = create_node(value);
+			new_node->next = current->next;
+			current->next = new_node;
+			return head;
+		}
+		current = current->next;
+		current_pos++;
+	}
+	fprintf(stderr, "Error: position %u out of bounds\n", pos);
+	exit(EXIT_FAILURE);
+	return NULL;
+}
+
+
 
 int main(void) {
 
@@ -1100,6 +1135,10 @@ int main(void) {
 	head = insert_at_start(head, 10);
 	head = insert_at_start(head, 20);
 	head = insert_at_start(head, 30);
+	insert_at_end(head, 22);
+
+	insert_at_position(head, 55, 2);
+
 	print_list(head);
 	free_list(head);
 
