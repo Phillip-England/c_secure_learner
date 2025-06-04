@@ -1109,6 +1109,14 @@ void free_list(LinkedListNode *head) {
 	}
 }
 
+LinkedListNode *free_node(LinkedListNode *node) {
+	if (node != NULL) {
+		free(node);
+		node = NULL;
+	}
+	return NULL;
+}
+
 LinkedListNode *insert_at_position(LinkedListNode *head, int value, uint8_t pos) {
 	uint8_t current_pos = 0;
 	LinkedListNode *current = head;
@@ -1127,6 +1135,35 @@ LinkedListNode *insert_at_position(LinkedListNode *head, int value, uint8_t pos)
 	return NULL;
 }
 
+LinkedListNode *remove_node(LinkedListNode *head, uint8_t pos) {
+	LinkedListNode *current = head;
+	uint8_t current_pos = 0;
+	if (pos == 0 && current != NULL) {
+		if (current->next == NULL) {
+			free_node(current);
+			return NULL;
+		}
+		LinkedListNode *next = current->next;
+		free_node(current);
+		return next;
+	}
+	while (current != NULL) {
+		if (current_pos == pos - 1) {
+			LinkedListNode *next = current->next;
+			if (next == NULL) {
+				break;
+			}
+			current->next = next->next;
+			next = free_node(next);
+			return head;
+		}
+		current = current->next;
+		current_pos++;
+	}
+	fprintf(stderr, "Error: position %u out of bounds\n", pos);
+	exit(EXIT_FAILURE);
+	return NULL;
+}
 
 
 int main(void) {
@@ -1138,6 +1175,8 @@ int main(void) {
 	insert_at_end(head, 22);
 
 	insert_at_position(head, 55, 2);
+
+	head = remove_node(head, 4);
 
 	print_list(head);
 	free_list(head);
